@@ -1,0 +1,30 @@
+:root{
+  /* Novel palette — ported from the original tool */
+  --paper:#f5f5f0; --paper-1:#fbfbf7; --card:#fcfbf6;
+  --ink:#231e21; --muted:#8a8276;
+  --accent:#d6b554; --accent-ink:#b7942f; --accent-hover:#c2a23f;
+  --red-sky:#5f231e; --park:#583f2f; --fig:#91a470; --midnight:#17213d;
+  --border:#e0dfd4;
+  --font-display:'Instrument Serif',Georgia,serif;
+  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font-sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.45}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 22px 56px}
+.wordmark{font-family:var(--font-display);font-size:30px;letter-spacing:.18em;text-transform:uppercase}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-ink)}
+h1{font-family:var(--font-display);font-weight:400;font-size:34px;margin:6px 0 16px}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;margin-bottom:18px}
+.weightbox{display:flex;align-items:center;gap:14px}
+.weightbox input{width:130px;font-size:24px;font-weight:600;padding:8px 12px;border:2px solid var(--accent);border-radius:12px;text-align:center;background:#fff}
+.unit{font-weight:700;color:var(--accent-ink)}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+thead th{background:var(--ink);color:var(--paper);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:9px 11px;text-align:left}
+tbody td{padding:9px 11px;border-top:1px solid var(--border)}
+.drug{font-weight:600}
+.vol{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.section-row td{background:var(--paper);font-weight:600;text-transform:uppercase;letter-spacing:.1em;font-size:11px}
+.log-pill{display:inline-block;font-size:9.5px;font-weight:700;color:var(--park);background:#f3ead6;border:1px solid #e3cf9b;border-radius:999px;padding:1px 7px;margin-left:6px}
+.disclaimer{font-size:13px;color:var(--park);background:#faf3e6;border:1px solid #ecdcb6;border-radius:14px;padding:13px 16px;margin-top:22px}
+.disclaimer strong{color:var(--red-sky)}
