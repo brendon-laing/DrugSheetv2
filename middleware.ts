@@ -1,5 +1,5 @@
-// Refreshes the Supabase auth session on every request and forwards cookies so Server
-// Components see a valid session. Standard @supabase/ssr middleware pattern.
+// Refreshes the Supabase auth session on every request, then gates the app:
+// unauthenticated users are redirected to /login. Standard @supabase/ssr pattern.
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 
@@ -25,12 +25,24 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Touch the session so it refreshes; do not run code between this and returning response.
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { pathname } = request.nextUrl;
+  const isPublic =
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/api/");
+
+  if (!user && !isPublic) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
   return response;
 }
 
 export const config = {
-  // Run on everything except static assets and images.
   matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
 };

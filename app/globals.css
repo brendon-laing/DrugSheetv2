@@ -28,3 +28,38 @@ tbody td{padding:9px 11px;border-top:1px solid var(--border)}
 .log-pill{display:inline-block;font-size:9.5px;font-weight:700;color:var(--park);background:#f3ead6;border:1px solid #e3cf9b;border-radius:999px;padding:1px 7px;margin-left:6px}
 .disclaimer{font-size:13px;color:var(--park);background:#faf3e6;border:1px solid #ecdcb6;border-radius:14px;padding:13px 16px;margin-top:22px}
 .disclaimer strong{color:var(--red-sky)}
+
+.panel-eyebrow{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+.legend{font-family:var(--font-display);font-size:16px;color:var(--muted);margin:14px 2px}
+
+/* buttons */
+.btn{appearance:none;border:none;border-radius:999px;cursor:pointer;font:inherit;font-weight:600;font-size:13px;padding:9px 16px;transition:all .15s ease}
+.btn-primary{background:var(--accent);color:var(--ink)}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-ghost{background:#fff;border:1px solid var(--border);color:var(--ink)}
+.btn-ghost:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-chart{background:var(--midnight);color:#fff;border:none;border-radius:7px;font-weight:600;font-size:12px;cursor:pointer}
+
+/* tabs */
+.tabs .tab{appearance:none}
+
+/* dose chips */
+.dosechip{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--border);background:var(--paper-1);transition:all .15s ease}
+.dosechip:hover{background:var(--accent);color:var(--ink);border-color:var(--accent-ink)}
+
+/* discharge remove button */
+.chk-rm{background:transparent;border:1px solid var(--border);color:var(--red-sky);border-radius:999px;width:22px;height:22px;padding:0;cursor:pointer;font-weight:700;line-height:1}
+.chk-rm:hover{background:var(--red-sky);color:#fff}
+
+/* vitals grid */
+.gridwrap{background:var(--card)}
+table.mon{border:none;border-radius:0;min-width:680px}
+table.mon th,table.mon td{border:1px solid var(--border);padding:0}
+table.mon thead th{background:var(--ink);color:var(--paper);padding:7px 6px;text-align:center;font-size:9.5px;min-width:60px}
+table.mon thead th:first-child{text-align:left;padding-left:11px;min-width:120px}
+table.mon tbody th{background:var(--paper-1);text-align:left;font-weight:600;font-size:11.5px;padding:6px 11px;white-space:nowrap}
+table.mon td input{width:100%;border:none;background:transparent;padding:7px 3px;text-align:center;font:inherit;font-size:12px}
+table.mon td input:focus{outline:none;background:#fff7e3}
+table.mon tr.timerow th,table.mon tr.timerow td{background:#f1ecdc}
+table.mon tr.timerow input{font-weight:700}

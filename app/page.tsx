@@ -1,138 +1,68 @@
-"use client";
-// Phase-0 demo page: proves the ported formulary + dose logic renders end-to-end.
-// In Phase 1 this becomes the authenticated chart workspace backed by Supabase.
-import { useState } from "react";
-import { SECTIONS } from "@/lib/formulary";
-import { calcDrug, fmt, kgToLb } from "@/lib/dosing";
-import { generateRx } from "@/lib/rx";
+// Roster home — auth-gated. Lists the clinic's patients and adds new ones.
+import type { CSSProperties } from "react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getContext, listPatients } from "@/lib/data";
+import { createPatient, signOut } from "@/lib/actions";
+import { kgToLb } from "@/lib/dosing";
 
-// Build an id → drug lookup once, so mirror drugs (e.g. Atipamezole → dexmed) resolve.
-const BY_ID = new Map<string, { drug: (typeof SECTIONS)[number]["drugs"][number]; sectionName: string }>();
-for (const s of SECTIONS) {
-  for (const d of s.drugs) if (d.id) BY_ID.set(d.id, { drug: d, sectionName: s.name });
-}
-const lookupById = (id: string) => BY_ID.get(id);
+export const dynamic = "force-dynamic";
 
-export default function DosingPage() {
-  const [weight, setWeight] = useState<number>(10);
+export default async function RosterPage() {
+  const ctx = await getContext();
+  if (!ctx) redirect("/login");
+  const patients = await listPatients();
 
   return (
     <main>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
-        <span className="wordmark">Novel</span>
-        <span className="eyebrow">Anaesthetic &amp; Surgical Chart</span>
-      </div>
-      <h1>Drug dosing</h1>
-
-      <div className="panel">
-        <div className="weightbox">
-          <label htmlFor="w" style={{ fontFamily: "var(--font-display)", fontSize: 22 }}>
-            Weight
-          </label>
-          <input
-            id="w"
-            type="number"
-            min={0}
-            step={0.01}
-            value={Number.isNaN(weight) ? "" : weight}
-            onChange={(e) => setWeight(parseFloat(e.target.value))}
-          />
-          <span className="unit">kg</span>
-          <span className="muted">
-            {weight > 0 ? `≈ ${kgToLb(weight)} lb` : ""}
-          </span>
+      <div className="masthead" style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", borderBottom: "1.5px solid var(--ink)", paddingBottom: 14, marginBottom: 20 }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
+          <span className="wordmark">Novel</span>
+          <span className="eyebrow">{ctx.clinicName}</span>
+        </div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <Link href="/log" className="btn btn-ghost">View log</Link>
+          <span style={{ fontSize: 12, color: "var(--muted)" }}>{ctx.email}</span>
+          <form action={signOut}><button className="btn btn-ghost" type="submit">Sign out</button></form>
         </div>
       </div>
 
-      {SECTIONS.map((section) => (
-        <table key={section.name} style={{ marginBottom: 18 }}>
+      <h1>Patients</h1>
+
+      <div className="panel">
+        <p className="panel-eyebrow">Add a patient</p>
+        <form action={createPatient} style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1.5fr 1fr auto", gap: 10, alignItems: "end" }}>
+          <div><label style={lbl}>Name</label><input name="name" required placeholder="Patient name" style={inp} /></div>
+          <div><label style={lbl}>Species</label><input name="species" placeholder="Canine" style={inp} /></div>
+          <div><label style={lbl}>Breed</label><input name="breed" placeholder="Beagle" style={inp} /></div>
+          <div><label style={lbl}>Weight (kg)</label><input name="weight_kg" type="number" step="0.01" placeholder="0.0" style={inp} /></div>
+          <button className="btn btn-primary" type="submit">Add &amp; open</button>
+        </form>
+      </div>
+
+      {patients.length === 0 ? (
+        <p className="legend" style={{ color: "var(--muted)" }}>No patients yet. Add one above to start a chart.</p>
+      ) : (
+        <table>
           <thead>
-            <tr>
-              <th style={{ width: "26%" }}>Drug</th>
-              <th>Conc.</th>
-              <th>Route</th>
-              <th>Dose range</th>
-              <th>Dose (low–high)</th>
-              <th>Volume mL (low–high)</th>
-            </tr>
+            <tr><th>Patient</th><th>Species / breed</th><th>Weight</th><th>Updated</th><th></th></tr>
           </thead>
           <tbody>
-            <tr className="section-row">
-              <td colSpan={6}>
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: 10,
-                    height: 10,
-                    borderRadius: 3,
-                    background: section.color,
-                    marginRight: 8,
-                  }}
-                />
-                {section.name}
-              </td>
-            </tr>
-            {section.drugs.map((drug, i) => {
-              if (drug.special === "rx") {
-                const rx = generateRx(drug.rxKind ?? "", weight);
-                return (
-                  <tr key={drug.name + i}>
-                    <td className="drug">
-                      {drug.name}
-                      {drug.log && <span className="log-pill">🪵 LOG</span>}
-                    </td>
-                    <td className="muted">{drug.form ?? "—"}</td>
-                    <td className="muted">{drug.route}</td>
-                    <td className="muted">
-                      {drug.low ? `${drug.low}–` : ""}
-                      {drug.high} {drug.doseU}
-                    </td>
-                    <td colSpan={2} style={{ color: "var(--park)", fontWeight: 600 }}>
-                      <strong>{rx.strength}</strong> — {rx.sig}
-                      {rx.detail && <span className="muted"> ({rx.detail})</span>}
-                    </td>
-                  </tr>
-                );
-              }
-              const r = calcDrug(drug, section.name, weight, { lookupById });
-              return (
-                <tr key={drug.name + i}>
-                  <td className="drug">
-                    {drug.name}
-                    {drug.log && <span className="log-pill">🪵 LOG</span>}
-                  </td>
-                  <td className="muted">
-                    {drug.conc ? `${drug.conc} ${drug.concU}` : "—"}
-                  </td>
-                  <td className="muted">{drug.route || "—"}</td>
-                  <td className="muted">
-                    {drug.low != null ? `${drug.low}–` : ""}
-                    {drug.high} {drug.doseU}
-                  </td>
-                  <td>
-                    {r.doseLow != null ? `${fmt(r.doseLow)}–` : ""}
-                    {r.doseHigh != null ? fmt(r.doseHigh) : "—"} {drug.dsgU}
-                  </td>
-                  <td className="vol">
-                    {r.volHigh != null
-                      ? `${r.volLow != null ? fmt(r.volLow) + "–" : ""}${fmt(r.volHigh)}${
-                          drug.mirror ? " (mirrors " + drug.mirror + ")" : ""
-                        }`
-                      : "—"}
-                  </td>
-                </tr>
-              );
-            })}
+            {patients.map((p) => (
+              <tr key={p.id}>
+                <td className="drug">{p.name ?? "Unnamed"}</td>
+                <td className="muted">{[p.species, p.breed].filter(Boolean).join(" · ") || "—"}</td>
+                <td>{p.weight_kg != null ? `${p.weight_kg} kg · ${kgToLb(p.weight_kg)} lb` : "—"}</td>
+                <td className="muted">{new Date(p.updated_at).toLocaleString()}</td>
+                <td><Link href={`/patient/${p.id}`} className="btn btn-ghost">Open chart →</Link></td>
+              </tr>
+            ))}
           </tbody>
         </table>
-      ))}
-
-      <div className="disclaimer">
-        <strong>Clinical decision-support only.</strong> Calculated values are estimates
-        based on the concentrations and dose ranges in the formulary. Verify every dose,
-        concentration, and route against current references and confirm with the attending
-        DVM before administration. 🪵 = controlled drug requiring a log entry.
-      </div>
+      )}
     </main>
   );
 }
+
+const lbl: CSSProperties = { display: "block", fontSize: 10.5, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--muted)", marginBottom: 4, fontWeight: 600 };
+const inp: CSSProperties = { width: "100%", padding: "9px 10px", border: "1px solid var(--border)", borderRadius: 10, background: "var(--paper-1)", font: "inherit" };
