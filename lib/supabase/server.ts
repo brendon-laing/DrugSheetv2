@@ -4,8 +4,10 @@
 //   that legitimately need elevated access (e.g. reading a clinic's Vetspire token).
 //   Never import this into client components.
 import { cookies } from "next/headers";
-import { createServerClient as _createServerClient } from "@supabase/ssr";
+import { createServerClient as _createServerClient, type CookieOptions } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
+
+type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
 export function createServerClient() {
   const cookieStore = cookies();
@@ -15,7 +17,7 @@ export function createServerClient() {
     {
       cookies: {
         getAll: () => cookieStore.getAll(),
-        setAll: (toSet) => {
+        setAll: (toSet: CookieToSet[]) => {
           try {
             toSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
